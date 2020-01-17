@@ -8,7 +8,7 @@
 
 
 using System;
-using System.Data.SqlClient;
+//using System.Data.SqlClient;
 using System.Reflection;
 using System.Text;
 
@@ -43,38 +43,38 @@ namespace TracerLib {
 					exceptionInfo.Append('-', titelLength);
 				}
 				
-				if (currentException.GetType()==typeof(SqlException)) {
-					//display additional info for sql server exception
-					SqlErrorCollection errorCollection = ((SqlException)currentException).Errors;
-					SqlError thisError; 
-					// list all SQL errors
-					for (int i=0; i < errorCollection.Count; i++) {
-						thisError = errorCollection[i];
-						exceptionInfo.AppendFormat("\r\nError " + (i+1) + 
-							", Severity " + thisError.Class +
-							", Number " + thisError.Number +
-							", State " + thisError.State +
-							", Server " + thisError.Server);
-						if (thisError.Procedure.Length>0) {
-							//list stored procedure name only if not empty
-							exceptionInfo.AppendFormat("\r\nat " + thisError.Procedure + " Line " + errorCollection[i].LineNumber);
-						}
-						exceptionInfo.AppendFormat(": \r\n" + thisError.Message);
-						
+//				if (currentException.GetType()==typeof(SqlException)) {
+//					//display additional info for sql server exception
+//					SqlErrorCollection errorCollection = ((SqlException)currentException).Errors;
+//					SqlError thisError; 
+//					// list all SQL errors
+//					for (int i=0; i < errorCollection.Count; i++) {
+//						thisError = errorCollection[i];
 //						exceptionInfo.AppendFormat("\r\nError " + (i+1) + 
-//							", Severity " + errorCollection[i].Class +
-//							", Number " + errorCollection[i].Number +
-//							", State " + errorCollection[i].State +
-//							", Server " + errorCollection[i].Server);
-//						if (errorCollection[i].Procedure.Length>0) {
+//							", Severity " + thisError.Class +
+//							", Number " + thisError.Number +
+//							", State " + thisError.State +
+//							", Server " + thisError.Server);
+//						if (thisError.Procedure.Length>0) {
 //							//list stored procedure name only if not empty
-//							exceptionInfo.AppendFormat("\r\nat " + errorCollection[i].Procedure + " Line " + errorCollection[i].LineNumber);
+//							exceptionInfo.AppendFormat("\r\nat " + thisError.Procedure + " Line " + errorCollection[i].LineNumber);
 //						}
-//						exceptionInfo.AppendFormat(": \r\n" + errorCollection[i].Message);
-					}
+//						exceptionInfo.AppendFormat(": \r\n" + thisError.Message);
+						
+////						exceptionInfo.AppendFormat("\r\nError " + (i+1) + 
+////							", Severity " + errorCollection[i].Class +
+////							", Number " + errorCollection[i].Number +
+////							", State " + errorCollection[i].State +
+////							", Server " + errorCollection[i].Server);
+////						if (errorCollection[i].Procedure.Length>0) {
+////							//list stored procedure name only if not empty
+////							exceptionInfo.AppendFormat("\r\nat " + errorCollection[i].Procedure + " Line " + errorCollection[i].LineNumber);
+////						}
+////						exceptionInfo.AppendFormat(": \r\n" + errorCollection[i].Message);
+//					}
 				
-				// non SQL exceptions
-				} else {
+//				// non SQL exceptions
+//				} else {
 					exceptionInfo.Append("\r\n" + currentException.Message);
 					// List the remaining properties of all other exceptions
 					PropertyInfo[] propertiesArray = currentException.GetType().GetProperties();
@@ -88,7 +88,7 @@ namespace TracerLib {
 							}
 						}
 					}
-				}
+				//}
 
 				// record the StackTrace with separate label.
 				if (currentException.StackTrace != null) {
