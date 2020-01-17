@@ -240,7 +240,7 @@ namespace TracerLib {
     /// <summary>
     /// Event gets raised when a message get traced.
     /// </summary>
-    public static event Action<TraceMessage[]> MessagesTraced;
+    public static event Action<TraceMessage[]>? MessagesTraced;
 
 
     #endregion
@@ -251,10 +251,10 @@ namespace TracerLib {
 
     //[ThreadStatic] creates for each threat a different previousTraceType and threadMessageString
     [ThreadStatic]static TraceTypeEnum previousTraceType; //default 0: TraceTypeEnum.undef
-    [ThreadStatic]static string threadMessageString;
+    [ThreadStatic]static string? threadMessageString;
 
 
-    private static void tracePerThread(TraceTypeEnum traceType, bool isNewLine, string filterText, string message, params object[] args) {
+    private static void tracePerThread(TraceTypeEnum traceType, bool isNewLine, string? filterText, string message, params object[] args) {
       if (previousTraceType!=traceType) {
         //queue previous message having different type
         if (threadMessageString!=null) {
@@ -286,15 +286,15 @@ namespace TracerLib {
     #region Multithreaded Queue
     //      -------------------
 
-    static Queue<TraceMessage> messagesQueue = new Queue<TraceMessage>(MaxMessageQueue);
+    static readonly Queue<TraceMessage> messagesQueue = new Queue<TraceMessage>(MaxMessageQueue);
     static bool isMessagesQueueOverflow;
 
 
-    private static void enqueueMessage(TraceTypeEnum traceType, string filterText, ref string threadMessageBuffer) {
+    private static void enqueueMessage(TraceTypeEnum traceType, string? filterText, ref string? threadMessageBuffer) {
       #if RealTimeTraceing
         RealTimeTracer.Trace("enqueueMessage(): start " + traceType.ShortString() + ": " + threadMessageBuffer);
       #endif
-      TraceMessage message = new TraceMessage(traceType, threadMessageBuffer, filterText);
+      TraceMessage message = new TraceMessage(traceType, threadMessageBuffer!, filterText);
       threadMessageBuffer = null;
 
       //break in debugger if needed
@@ -347,11 +347,11 @@ namespace TracerLib {
     //      -----------------
 
     //storage of all messages. Other threads can get a copy with GetTrace()
-    static Queue<TraceMessage> messageBuffer = new Queue<TraceMessage>(MaxMessageBuffer);
+    static readonly Queue<TraceMessage> messageBuffer = new Queue<TraceMessage>(MaxMessageBuffer);
 
 
     static volatile bool isDoTracing = true;
-    static Timer tracerTimer = createTracerTimer();
+    static readonly Timer tracerTimer = createTracerTimer();
 
 
     private static Timer createTracerTimer() {
@@ -364,7 +364,7 @@ namespace TracerLib {
     static bool isTracerTimerMethodRunning = false;
 
 
-    private static void tracerTimerMethod(object state) {
+    private static void tracerTimerMethod(object? state) {
       try { //thread needs to catch its exceptions
         #if RealTimeTraceing
           RealTimeTracer.Trace("TracerTimer: start");
@@ -521,12 +521,12 @@ namespace TracerLib {
     /// <summary>
     /// Make a break in Visual Studio, if it is attached
     /// </summary>
-    public static void BreakInDebuggerOrDoNothing(string message) {
+    public static void BreakInDebuggerOrDoNothing(string? message) {
 #if DEBUG
       try {
         if (Debugger.IsAttached) {
           //if an exception has occured, then the messge is available in the ouput window of the debugger
-          Debug.WriteLine(DateTime.Now.ToString("mm:ss.fff") + " BreakInDebuggerOrDoNothing");
+          Debug.WriteLine(DateTime.Now.ToString("mm:ss.fff") + " BreakInDebuggerOrDoNothing " + message);
           Debugger.Break();
         }
       } catch { }

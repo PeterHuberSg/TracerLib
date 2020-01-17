@@ -27,7 +27,7 @@ namespace TracerLib {
 			int titelLength; 
 			
 			// Loop through all exceptions
-			Exception currentException = thisException;	// Temp variable to hold InnerException object during the loop.
+			Exception? currentException = thisException;	// Temp variable to hold InnerException object during the loop.
 			int exceptionCount = 1;				// Count variable to track the number of exceptions in the chain.
 			do {
 				// exception type and message as title

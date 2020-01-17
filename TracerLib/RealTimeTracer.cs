@@ -67,12 +67,12 @@ namespace TracerLib {
     
 
     //message buffer
-    static string[] messages = new string[MaxMessages];
-    static string[] threadNames = new string[MaxMessages];
-    static long[] ticks = new long[MaxMessages];
+    static readonly string[] messages = new string[MaxMessages];
+    static readonly string[] threadNames = new string[MaxMessages];
+    static readonly long[] ticks = new long[MaxMessages];
     static int messagesIndex = -1; //the counter gets incremented before its use
 
-    static Stopwatch stopWatch;
+    static readonly Stopwatch stopWatch;
 
 
     static RealTimeTracer() {
@@ -94,7 +94,7 @@ namespace TracerLib {
       int thisIndex = Interlocked.Increment(ref messagesIndex) & indexMask;
       ticks[thisIndex] = stopWatch.ElapsedTicks;
       messages[thisIndex] = message;
-      threadNames[thisIndex] = Thread.CurrentThread.Name;
+      threadNames[thisIndex] = Thread.CurrentThread.Name??"";
     }
 
 

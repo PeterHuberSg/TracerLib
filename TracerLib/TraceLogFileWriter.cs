@@ -20,13 +20,13 @@ namespace TracerLib {
     /// <summary>
     /// File parameters like file name and location, size limitations, etc.
     /// </summary>
-    public FileParameterStruct FileParameter { get { return logFileWriter.FileParameter; } }
+    public FileParameterStruct FileParameter { get { return logFileWriter!.FileParameter; } }
 
 
     /// <summary>
     /// Get the full path and name of the current file
     /// </summary>
-    public string FullName { get { return logFileWriter.FullName; } }
+    public string FullName { get { return logFileWriter?.FullName??""; } }
 
 
     /// <summary>
@@ -41,10 +41,16 @@ namespace TracerLib {
 
 
     /// <summary>
+    /// The filter method is called to decide if the TraceMessage should get written to the log file
+    /// </summary>
+    public Func<TraceMessage, bool>? Filter { get; set; }
+
+
+    /// <summary>
     /// newFileCreated is called when existing file is full and a new file gets created. This action is called on the 
     /// MessageTracker thread
     /// </summary>
-    Action newFileCreated;
+    readonly Action? newFileCreated;
     #endregion
 
 
@@ -53,7 +59,7 @@ namespace TracerLib {
 
     const string traceLogFileWriterMarker = "==================";
     const string fileExtension    = "txt";
-    string fileName;
+    readonly string fileName;
 
 
     /// <summary>
@@ -71,8 +77,7 @@ namespace TracerLib {
     }
 
 
-    LogFileWriter logFileWriter;
-    Func<TraceMessage, bool> filter;
+    LogFileWriter? logFileWriter;
 
 
     /// <summary>
@@ -84,7 +89,8 @@ namespace TracerLib {
       long maxFileByteCount,
       int maxFileCount,
       int logFileWriterTimerInitialDelay = 10,
-      int logFileWriterTimerInterval = 10000) {
+      int logFileWriterTimerInterval = 10000) 
+    {
 
       //lock (lineQueueLock) {
       //setup logFileWriter
@@ -118,12 +124,12 @@ namespace TracerLib {
     }
 
 
-    void writeMessages(TraceMessage[] TraceMessages) {
+    void writeMessages(TraceMessage[] traceMessages) {
       if (logFileWriter==null) return; //logFileWriter is disposed
 
       lock(logFileWriter){
-        foreach (TraceMessage traceMessage in TraceMessages) {
-          if (filter!=null && filter(traceMessage)) continue;
+        foreach (TraceMessage traceMessage in traceMessages) {
+          if (Filter!=null && Filter(traceMessage)) continue;
 
           logFileWriter.WriteMessage(traceMessage.ToString());
         }
@@ -133,9 +139,7 @@ namespace TracerLib {
 
 
     string logFileWriter_GetNewFileHeader() {
-      if (newFileCreated!=null) {
-        newFileCreated();
-      }
+      newFileCreated?.Invoke();
       return getSeparatorLine(traceLogFileWriterMarker + " " + DateTime.Now.ToShortDateString() + "@#MachineFile#@" + getHeaderText() + " " + traceLogFileWriterMarker);
     }
 
@@ -146,8 +150,8 @@ namespace TracerLib {
 
 
     public void FlushAndCloseLogFileWriter() {
-      LogFileWriter tmpLogFileWriter = null;
-      tmpLogFileWriter = Interlocked.Exchange(ref logFileWriter, tmpLogFileWriter);
+      LogFileWriter? tmpLogFileWriter = null;
+      tmpLogFileWriter = Interlocked.Exchange(ref logFileWriter!, tmpLogFileWriter);
       if (tmpLogFileWriter!=null) {
         tmpLogFileWriter.Dispose();
       }
@@ -159,8 +163,8 @@ namespace TracerLib {
     /// </summary>
     public void Reset() {
       if (logFileWriter!=null) {
-        logFileWriter = null;
         logFileWriter.Dispose();
+        logFileWriter = null;
       }
     }
     #endregion
@@ -200,7 +204,7 @@ namespace TracerLib {
     /// Supports the changing of file name, size, etc.
     /// </summary>
     public void ChangeProperties(string newDirectoryPath, long newMaxFileByteCount, int newMaxFileCount){
-      logFileWriter.ChangeFileProperties(
+      logFileWriter!.ChangeFileProperties(
         new FileParameterStruct(newDirectoryPath, fileName, fileExtension, newMaxFileByteCount, newMaxFileCount));
     }
     

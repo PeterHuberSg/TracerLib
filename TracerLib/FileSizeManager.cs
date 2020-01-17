@@ -211,7 +211,7 @@ namespace TracerLib {
     /// <summary>
     /// Full Path of the current active file
     /// </summary>
-    public string FullName { get { return currentFileInfo.FullName; } }
+    public string FullName { get { return currentFileInfo?.FullName??""; } }
 
 
     /// <summary>
@@ -229,9 +229,9 @@ namespace TracerLib {
     //      -----------
 
     private int currentFileNumber;
-    private List<FileInfoNumberStruct> fileList;
-    private DirectoryInfo directoryInfo;
-    private FileInfo currentFileInfo;
+    private readonly List<FileInfoNumberStruct> fileList;
+    private readonly DirectoryInfo directoryInfo;
+    private FileInfo? currentFileInfo;
 
     /// <summary>
     /// Constructor
@@ -242,10 +242,9 @@ namespace TracerLib {
     /// </summary>
     public FileSizeManager(FileParameterStruct newParameter) {
       //ensure that parameters are valid.
-      string problem = null;
-      if (!newParameter.ValidateConstructorParameters(false, out problem)) {
-        throw new Exception("Cannot create '" + newParameter.ToString() + "'." +  
-          (problem==null ? "" : " The following problem occured: " + Environment.NewLine + problem));
+      if (!newParameter.ValidateConstructorParameters(false, out string problem)) {
+        throw new Exception("Cannot create '" + newParameter.ToString() + "'." +
+          (problem=="" ? "" : " The following problem occured: " + Environment.NewLine + problem));
       }
 
       //create directory if necessary and prepare filelist
@@ -258,7 +257,6 @@ namespace TracerLib {
       FileInfo[] fileInfos =
           directoryInfo.GetFiles(fileParameter.GetFileSearchPattern(), SearchOption.TopDirectoryOnly);
 
-      int fileNumber = 1;
       currentFileNumber = 1;
       //TestFileName123.tst ==> 123
       //             TestFileName
@@ -267,7 +265,7 @@ namespace TracerLib {
       int extensionLength = 1 + fileParameter.FileExtension.Length;
       foreach (FileInfo fileInfo in fileInfos) {
         string fileName = fileInfo.Name;
-        if (int.TryParse(fileName.Substring(startPos, fileName.Length-startPos-extensionLength), out fileNumber)) {
+        if (int.TryParse(fileName.Substring(startPos, fileName.Length-startPos-extensionLength), out int fileNumber)) {
           fileList.Add(new FileInfoNumberStruct(fileNumber, fileInfo));
 
           if (fileNumber>currentFileNumber) {
@@ -353,7 +351,7 @@ namespace TracerLib {
     #region File Information Structure
     //      --------------------------
 
-    private struct FileInfoNumberStruct: IComparable<FileInfoNumberStruct> {
+    public struct FileInfoNumberStruct: IComparable<FileInfoNumberStruct> {
       public int FileNumber;
       public FileInfo FileInfo;
 
